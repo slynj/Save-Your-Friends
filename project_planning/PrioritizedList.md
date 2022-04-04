@@ -1,7 +1,5 @@
 # Prioritized Feature List
 
----
-
 # Game Scene (P1)
 
 - User-controlled Character (keyboard arrow keys) [P1]

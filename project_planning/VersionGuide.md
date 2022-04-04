@@ -1,7 +1,5 @@
 # Version Guide
 
----
-
 # V1
 
 - User-controlled Character (keyboard arrow keys)
