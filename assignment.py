@@ -17,10 +17,6 @@
 import pygame
 
 
-def mainScreen(ev, mainSurface):
-    pass
-
-
 def createText(t, f="Arial", s=200, c=(255, 255, 0), b=False, i=False):
     font = pygame.font.SysFont(f, s, bold=b, italic=i)
     text = font.render(t, True, c)
@@ -28,11 +24,10 @@ def createText(t, f="Arial", s=200, c=(255, 255, 0), b=False, i=False):
 
 
 def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
-    dimension = [textX, textY, text.get_width(), text.get_height()]
-    #rect = ()
-    #text = ()
-    #pygame.draw.rect(mainSurface, c, dimension)
-    mainSurface.blit(text, textX, textY)
+    paddingW = text.get_width()*1.5
+    dimension = [textX-10, textY, text.get_width()+20, text.get_height()]
+    pygame.draw.rect(mainSurface, c, dimension, border_radius=10)
+    mainSurface.blit(text, (textX, textY))
 
 
 def horizontalC(item, mainSurface):
@@ -54,9 +49,10 @@ def main():
     # -----------------------------Program Variable Initialization----------------------- #
     # Set up some data to describe a small circle and its color
     programState = "main"
-
-    mainTitle = createText("TITLE", s=150, c=(0, 100, 0))
+    mainTitle = createText("SAVE YOUR FRIENDS", f="retro", s=100, c=(0, 100, 0))
     startBttn = createText("start", s=50, c=(0, 100, 120))
+
+    print(pygame.font.get_fonts())
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -77,19 +73,11 @@ def main():
         mainSurface.fill((255, 255, 255))
 
         if programState == "main":
-            # mainScreen(ev, mainSurface)
             mainSurface.blit(mainTitle, (horizontalC(mainTitle, mainSurface), surfaceSize / 2))
+            # mainSurface, text, textX, textY, c = (0, 0, 0)
+            createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 4)
 
-            """
-            dimension = [startBttn.get_rect().bottom, startBttn.get_rect().top, startBttn.get_width(),
-                         startBttn.get_height()]
-            #print(startBttn.get_rect())
-            pygame.draw.rect(mainSurface, (0, 0, 0), dimension)
-            # mainSurface.blit(mainSurface, startBttn.get_rect(center=(100, 100)))
-            """
-            #mainSurface, text, textX, textY, c = (0, 0, 0)
-            createBttn(mainSurface, startBttn, 100, 300)
-            #mainSurface.blit(createBttn())
+
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
