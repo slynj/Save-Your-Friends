@@ -22,12 +22,45 @@ def createText(t, f="Arial", s=200, c=(255, 255, 0), b=False, i=False):
     text = font.render(t, True, c)
     return text
 
-
+'''
 def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
-    paddingW = text.get_width()*1.5
-    dimension = [textX-10, textY, text.get_width()+20, text.get_height()]
+    paddingW = text.get_width()*0.3
+    paddingH = text.get_height()*0.1
+    dimension = [textX-paddingW/2, textY-paddingH/2, text.get_width()+paddingW, text.get_height()+paddingH]
     pygame.draw.rect(mainSurface, c, dimension, border_radius=10)
     mainSurface.blit(text, (textX, textY))
+    
+    bttn = pygame.Rect(dimension)
+    if bttn.collidepoint(mouse[0], mouse[1]):
+        print("test")
+'''
+
+
+def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
+    paddingW = text.get_width()*0.3
+    paddingH = text.get_height()*0.1
+    dimension = [textX-paddingW/2, textY-paddingH/2, text.get_width()+paddingW, text.get_height()+paddingH]
+    pygame.draw.rect(mainSurface, c, dimension, border_radius=10)
+    mainSurface.blit(text, (textX, textY))
+
+
+def bttnDimension(mouse, text, textX, textY):
+    paddingW = text.get_width() * 0.3
+    paddingH = text.get_height() * 0.1
+    dimension = [textX - paddingW / 2, textY - paddingH / 2, text.get_width() + paddingW, text.get_height() + paddingH]
+    bttn = pygame.Rect(dimension)
+    if bttn.collidepoint(mouse[0], mouse[1]):
+        return True
+    else:
+        return False
+
+
+def detectBttn(bttn, mouse):
+    return True if bttn.collidepoint(mouse[0], mouse[1]) else False
+
+
+def displayImg(mainSurface, img, x, y):
+    mainSurface.blit(img, (x, y))
 
 
 def horizontalC(item, mainSurface):
@@ -46,13 +79,15 @@ def main():
     # Create surface of (width, height), and its window.
     mainSurface = pygame.display.set_mode((surfaceSize, surfaceSize))
 
+    pygame.display.set_caption("Save Your Friends")
+
     # -----------------------------Program Variable Initialization----------------------- #
     # Set up some data to describe a small circle and its color
     programState = "main"
-    mainTitle = createText("SAVE YOUR FRIENDS", f="retro", s=100, c=(0, 100, 0))
-    startBttn = createText("start", s=50, c=(0, 100, 120))
+    mainTitle = createText("SAVE YOUR FRIENDS", f="retro", s=100, c=(255, 255, 255))
+    startBttn = createText("START", s=30, c=(255, 255, 255))
+    titleImg = pygame.image.load('title.png')
 
-    print(pygame.font.get_fonts())
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -70,12 +105,16 @@ def main():
         # -----------------------------Drawing Everything--------------------------------#
         # We draw everything from scratch on each frame.
         # So first fill everything with the background color
-        mainSurface.fill((255, 255, 255))
+        mainSurface.fill((118, 150, 194))
 
         if programState == "main":
-            mainSurface.blit(mainTitle, (horizontalC(mainTitle, mainSurface), surfaceSize / 2))
+            #mainSurface.blit(mainTitle, (horizontalC(mainTitle, mainSurface), surfaceSize / 2))
+            displayImg(mainSurface, titleImg, horizontalC(titleImg, mainSurface), surfaceSize / 2.5)
             # mainSurface, text, textX, textY, c = (0, 0, 0)
-            createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 4)
+            createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3, (65, 104, 158))
+            #bttnDimension(mouse, text, textX, textY)
+            #start =
+            bttnDimension(mouse, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3)
 
 
 
