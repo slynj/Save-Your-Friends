@@ -70,6 +70,8 @@ def horizontalC(item, mainSurface):
 def main():
     # -----------------------------Setup------------------------------------------------- #
     """ Set up the game and run the main game loop """
+    global mouseUp
+
     pygame.init()  # Prepare the pygame module for use
     pygame.font.init()
     surfaceSize = 800  # Desired physical surface size, in pixels.
@@ -86,7 +88,11 @@ def main():
     programState = "main"
     mainTitle = createText("SAVE YOUR FRIENDS", f="retro", s=100, c=(255, 255, 255))
     startBttn = createText("START", s=30, c=(255, 255, 255))
+    startBttnC = (65, 104, 158)
     titleImg = pygame.image.load('title.png')
+    bkgImg = pygame.image.load('background.png').convert_alpha()
+    bkgImg = pygame.transform.smoothscale(bkgImg, (surfaceSize, surfaceSize))
+    mouseUp = False
 
 
     # -----------------------------Main Game Loop----------------------------------------#
@@ -96,6 +102,10 @@ def main():
         ev = pygame.event.poll()  # Look for any event
         if ev.type == pygame.QUIT:  # Window close button clicked?
             break  # ... leave game loop
+        if ev.type == pygame.MOUSEBUTTONUP:
+            mouseUp = True
+        #else:
+          #  mouseUp = False
 
         mouse = pygame.mouse.get_pos()
 
@@ -111,10 +121,20 @@ def main():
             #mainSurface.blit(mainTitle, (horizontalC(mainTitle, mainSurface), surfaceSize / 2))
             displayImg(mainSurface, titleImg, horizontalC(titleImg, mainSurface), surfaceSize / 2.5)
             # mainSurface, text, textX, textY, c = (0, 0, 0)
-            createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3, (65, 104, 158))
+            createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3, startBttnC)
             #bttnDimension(mouse, text, textX, textY)
             #start =
-            bttnDimension(mouse, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3)
+            startBttnHov = bttnDimension(mouse, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3)
+            if startBttnHov:
+                startBttnC = (184, 199, 219)
+                if mouseUp:
+                    programState = "game"
+            else:
+                startBttnC = (101, 128, 166)
+
+        elif programState == "game":
+            displayImg(mainSurface, bkgImg, 0, 0)
+
 
 
 
