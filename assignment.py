@@ -104,6 +104,9 @@ def main():
 
     coinRanX = True
     coinRanXList = []
+    coinNum = 5
+    coinY = 0
+    coinSpeed = 5
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -155,42 +158,30 @@ def main():
 
         elif programState == "game":
             displayImg(mainSurface, bkgImg, 0, 0)
-            # if coinRanX:
-            #    for i in range(10):
-            #        coinRanXList.append(random.randint(0, surfaceSize))
-            #    coinRanX = False
 
-            '''
+            if coinY == 100:
+                coinRanX = True
+
             if coinRanX:
-                coinRanXList = [10]
-                while len(coinRanXList) < 10:
-                    newX = random.randint(0, surfaceSize)
-                    print(newX)
+                while len(coinRanXList) < coinNum:
+                    newX = random.randint(0, surfaceSize - coinImg.get_width())
 
+                    closeX = False
                     for i in range(len(coinRanXList)):
-                        if newX - 10 < coinRanXList[i] < newX + 10:
-                            print("if")
 
-                        else:
-                            coinRanXList.append(newX)
-                coinRanX = False
-            '''
+                        if coinRanXList[i] - 80 < newX and newX < coinRanXList[i] + 80:
+                            closeX = True
 
-            if coinRanX:
-                for i in range(10):
-                    coinRanXList.append(random.randint(0, surfaceSize, 50))
-                coinRanXList.sort()
-                coinRanXFin = list(coinRanXList)
-                print(coinRanXFin)
-
-                for i in range(len(coinRanXFin) - 1):
-                    if coinRanXFin[i + 1] - coinRanXFin[i] < 60:
-                        coinRanXFin.remove(coinRanXFin[i])
+                    if not closeX:
+                        coinRanXList.append(newX)
 
                 coinRanX = False
 
-            for i in range(10):
-                displayImg(mainSurface, coinImg, coinRanXList[i], 0)
+            coinY += coinSpeed
+
+
+            for i in range(coinNum):
+                displayImg(mainSurface, coinImg, coinRanXList[i], coinY)
 
             characterPos[0] += characterSpeed[0]
             displayImg(mainSurface, characterImg, characterPos[0], characterPos[1])
