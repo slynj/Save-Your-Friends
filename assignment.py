@@ -16,12 +16,14 @@
 # coin https://stock.adobe.com/search?k=8+bit+coin&asset_id=392227316
 # character https://openclipart.org/detail/248259/retro-character-sprite-sheet
 import pygame
+import random
 
 
 def createText(t, f="Arial", s=200, c=(255, 255, 0), b=False, i=False):
     font = pygame.font.SysFont(f, s, bold=b, italic=i)
     text = font.render(t, True, c)
     return text
+
 
 '''
 def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
@@ -38,9 +40,9 @@ def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
 
 
 def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
-    paddingW = text.get_width()*0.3
-    paddingH = text.get_height()*0.1
-    dimension = [textX-paddingW/2, textY-paddingH/2, text.get_width()+paddingW, text.get_height()+paddingH]
+    paddingW = text.get_width() * 0.3
+    paddingH = text.get_height() * 0.1
+    dimension = [textX - paddingW / 2, textY - paddingH / 2, text.get_width() + paddingW, text.get_height() + paddingH]
     pygame.draw.rect(mainSurface, c, dimension, border_radius=10)
     mainSurface.blit(text, (textX, textY))
 
@@ -93,12 +95,15 @@ def main():
     coinImg = pygame.transform.smoothscale(coinImg, (40, 40))
 
     characterImg = pygame.image.load('character.png').convert_alpha()
-    characterPos = [surfaceSize/2, 600]  # X and Y Positions
+    characterPos = [surfaceSize / 2, 600]  # X and Y Positions
     characterSpeed = [0, 0]  # X and Y Speeds
-    characterImg = pygame.transform.smoothscale(characterImg, (characterImg.get_width() / 2, characterImg.get_height() / 2))
+    characterImg = pygame.transform.smoothscale(characterImg,
+                                                (characterImg.get_width() / 2, characterImg.get_height() / 2))
 
     mouseUp = False
 
+    coinRanX = True
+    coinRanXList = []
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -114,7 +119,7 @@ def main():
         elif ev.type == pygame.KEYDOWN:
             if programState == "game":
                 if ev.key == pygame.K_LEFT:
-                    characterSpeed[0] -= 10
+                    characterSpeed[0] -= 5
                 elif ev.key == pygame.K_RIGHT:
                     characterSpeed[0] += 5
 
@@ -133,12 +138,14 @@ def main():
         mainSurface.fill((118, 150, 194))
 
         if programState == "main":
-            #mainSurface.blit(mainTitle, (horizontalC(mainTitle, mainSurface), surfaceSize / 2))
+            # mainSurface.blit(mainTitle, (horizontalC(mainTitle, mainSurface), surfaceSize / 2))
             displayImg(mainSurface, titleImg, horizontalC(titleImg, mainSurface), surfaceSize / 2.5)
             # mainSurface, text, textX, textY, c = (0, 0, 0)
-            createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3, startBttnC)
-            #bttnDimension(mouse, text, textX, textY)
-            startBttnHov = bttnDimension(mouse, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3)
+            createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3,
+                       startBttnC)
+            # bttnDimension(mouse, text, textX, textY)
+            startBttnHov = bttnDimension(mouse, startBttn, horizontalC(startBttn, mainSurface),
+                                         surfaceSize - surfaceSize / 3)
             if startBttnHov:
                 startBttnC = (184, 199, 219)
                 if mouseUp:
@@ -148,7 +155,42 @@ def main():
 
         elif programState == "game":
             displayImg(mainSurface, bkgImg, 0, 0)
-            displayImg(mainSurface, coinImg, 0, 0)
+            # if coinRanX:
+            #    for i in range(10):
+            #        coinRanXList.append(random.randint(0, surfaceSize))
+            #    coinRanX = False
+
+            '''
+            if coinRanX:
+                coinRanXList = [10]
+                while len(coinRanXList) < 10:
+                    newX = random.randint(0, surfaceSize)
+                    print(newX)
+
+                    for i in range(len(coinRanXList)):
+                        if newX - 10 < coinRanXList[i] < newX + 10:
+                            print("if")
+
+                        else:
+                            coinRanXList.append(newX)
+                coinRanX = False
+            '''
+
+            if coinRanX:
+                for i in range(10):
+                    coinRanXList.append(random.randint(0, surfaceSize, 50))
+                coinRanXList.sort()
+                coinRanXFin = list(coinRanXList)
+                print(coinRanXFin)
+
+                for i in range(len(coinRanXFin) - 1):
+                    if coinRanXFin[i + 1] - coinRanXFin[i] < 60:
+                        coinRanXFin.remove(coinRanXFin[i])
+
+                coinRanX = False
+
+            for i in range(10):
+                displayImg(mainSurface, coinImg, coinRanXList[i], 0)
 
             characterPos[0] += characterSpeed[0]
             displayImg(mainSurface, characterImg, characterPos[0], characterPos[1])
@@ -157,10 +199,6 @@ def main():
                 characterPos[0] = 1
             elif characterPos[0] >= surfaceSize - characterImg.get_width():
                 characterPos[0] = surfaceSize - characterImg.get_width() - 1
-
-
-
-
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
