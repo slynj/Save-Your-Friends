@@ -13,7 +13,8 @@
 #   ...
 #   ...
 # ---------------------------------------------------------------------------------------#
-
+# coin https://stock.adobe.com/search?k=8+bit+coin&asset_id=392227316
+# character https://openclipart.org/detail/248259/retro-character-sprite-sheet
 import pygame
 
 
@@ -55,10 +56,6 @@ def bttnDimension(mouse, text, textX, textY):
         return False
 
 
-def detectBttn(bttn, mouse):
-    return True if bttn.collidepoint(mouse[0], mouse[1]) else False
-
-
 def displayImg(mainSurface, img, x, y):
     mainSurface.blit(img, (x, y))
 
@@ -85,13 +82,21 @@ def main():
 
     # -----------------------------Program Variable Initialization----------------------- #
     # Set up some data to describe a small circle and its color
-    programState = "main"
-    mainTitle = createText("SAVE YOUR FRIENDS", f="retro", s=100, c=(255, 255, 255))
+    programState = "game"
+    mainTitle = createText("SAVE YOUR FRIENDS", f="upheavtt.ttf", s=100, c=(255, 255, 255))
     startBttn = createText("START", s=30, c=(255, 255, 255))
     startBttnC = (65, 104, 158)
     titleImg = pygame.image.load('title.png')
     bkgImg = pygame.image.load('background.png').convert_alpha()
     bkgImg = pygame.transform.smoothscale(bkgImg, (surfaceSize, surfaceSize))
+    coinImg = pygame.image.load('coin.png').convert_alpha()
+    coinImg = pygame.transform.smoothscale(coinImg, (40, 40))
+
+    characterImg = pygame.image.load('character.png').convert_alpha()
+    characterPos = [surfaceSize/2, 600]  # X and Y Positions
+    characterSpeed = [0, 0]  # X and Y Speeds
+    characterImg = pygame.transform.smoothscale(characterImg, (characterImg.get_width() / 2, characterImg.get_height() / 2))
+
     mouseUp = False
 
 
@@ -102,10 +107,20 @@ def main():
         ev = pygame.event.poll()  # Look for any event
         if ev.type == pygame.QUIT:  # Window close button clicked?
             break  # ... leave game loop
-        if ev.type == pygame.MOUSEBUTTONUP:
+
+        elif ev.type == pygame.MOUSEBUTTONUP:
             mouseUp = True
-        #else:
-          #  mouseUp = False
+
+        elif ev.type == pygame.KEYDOWN:
+            if programState == "game":
+                if ev.key == pygame.K_LEFT:
+                    characterSpeed[0] -= 10
+                elif ev.key == pygame.K_RIGHT:
+                    characterSpeed[0] += 5
+
+        elif ev.type == pygame.KEYUP:
+            if programState == "game":
+                characterSpeed[0] = 0
 
         mouse = pygame.mouse.get_pos()
 
@@ -123,7 +138,6 @@ def main():
             # mainSurface, text, textX, textY, c = (0, 0, 0)
             createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3, startBttnC)
             #bttnDimension(mouse, text, textX, textY)
-            #start =
             startBttnHov = bttnDimension(mouse, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3)
             if startBttnHov:
                 startBttnC = (184, 199, 219)
@@ -134,6 +148,16 @@ def main():
 
         elif programState == "game":
             displayImg(mainSurface, bkgImg, 0, 0)
+            displayImg(mainSurface, coinImg, 0, 0)
+
+            characterPos[0] += characterSpeed[0]
+            displayImg(mainSurface, characterImg, characterPos[0], characterPos[1])
+
+            if characterPos[0] <= 0:
+                characterPos[0] = 1
+            elif characterPos[0] >= surfaceSize - characterImg.get_width():
+                characterPos[0] = surfaceSize - characterImg.get_width() - 1
+
 
 
 
