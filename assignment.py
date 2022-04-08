@@ -19,26 +19,14 @@ import pygame
 import random
 
 
+# Receives a string and other characters of a text and returns a rendered text
 def createText(t, f="Arial", s=200, c=(255, 255, 0), b=False, i=False):
     font = pygame.font.SysFont(f, s, bold=b, italic=i)
     text = font.render(t, True, c)
     return text
 
 
-'''
-def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
-    paddingW = text.get_width()*0.3
-    paddingH = text.get_height()*0.1
-    dimension = [textX-paddingW/2, textY-paddingH/2, text.get_width()+paddingW, text.get_height()+paddingH]
-    pygame.draw.rect(mainSurface, c, dimension, border_radius=10)
-    mainSurface.blit(text, (textX, textY))
-    
-    bttn = pygame.Rect(dimension)
-    if bttn.collidepoint(mouse[0], mouse[1]):
-        print("test")
-'''
-
-
+# Receives a text of the button with XY coordinates and draws a rectangle button with that text
 def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
     paddingW = text.get_width() * 0.3
     paddingH = text.get_height() * 0.1
@@ -47,6 +35,7 @@ def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
     mainSurface.blit(text, (textX, textY))
 
 
+# Collision detection for the button, returns TRUE or FALSE
 def bttnDimension(mouse, text, textX, textY):
     paddingW = text.get_width() * 0.3
     paddingH = text.get_height() * 0.1
@@ -58,18 +47,19 @@ def bttnDimension(mouse, text, textX, textY):
         return False
 
 
+# Draws the image on the given coordinates
 def displayImg(mainSurface, img, x, y):
     mainSurface.blit(img, (x, y))
 
 
+# Calculates what coordinate of the item's horizontal centre is
 def horizontalC(item, mainSurface):
     return int((mainSurface.get_width() - item.get_width()) // 2)
 
 
 def main():
     # -----------------------------Setup------------------------------------------------- #
-    """ Set up the game and run the main game loop """
-    global mouseUp
+    global mouseUp # MouseUp boolean to use in and out of the while loop
 
     pygame.init()  # Prepare the pygame module for use
     pygame.font.init()
@@ -84,13 +74,21 @@ def main():
 
     # -----------------------------Program Variable Initialization----------------------- #
     # Set up some data to describe a small circle and its color
+    # Game Setup
     programState = "game"
-    mainTitle = createText("SAVE YOUR FRIENDS", f="upheavtt.ttf", s=100, c=(255, 255, 255))
+
+    # Title
+    titleImg = pygame.image.load('title.png')
+
+    # Start Button
     startBttn = createText("START", s=30, c=(255, 255, 255))
     startBttnC = (65, 104, 158)
-    titleImg = pygame.image.load('title.png')
+
+    # Background
     bkgImg = pygame.image.load('background.png').convert_alpha()
     bkgImg = pygame.transform.smoothscale(bkgImg, (surfaceSize, surfaceSize))
+
+    # Characters Graphics
     coinImg = pygame.image.load('coin.png').convert_alpha()
     coinImg = pygame.transform.smoothscale(coinImg, (40, 40))
 
@@ -100,13 +98,16 @@ def main():
     characterImg = pygame.transform.smoothscale(characterImg,
                                                 (characterImg.get_width() / 2, characterImg.get_height() / 2))
 
+    # Mouse click detection
     mouseUp = False
 
-    coinRanX = True
+    # Variables for random XY coordinates of the coin
+    coinRanInit = True
     coinRanXList = []
-    coinNum = 5
-    coinY = 0
+    coinRanYList = []
+    coinNum = 10
     coinSpeed = 5
+    coinTouch = False
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -159,29 +160,60 @@ def main():
         elif programState == "game":
             displayImg(mainSurface, bkgImg, 0, 0)
 
-            if coinY == 100:
-                coinRanX = True
-
-            if coinRanX:
+            if coinRanInit:
                 while len(coinRanXList) < coinNum:
                     newX = random.randint(0, surfaceSize - coinImg.get_width())
 
                     closeX = False
                     for i in range(len(coinRanXList)):
 
-                        if coinRanXList[i] - 80 < newX and newX < coinRanXList[i] + 80:
+                        if coinRanXList[i] - 60 < newX and newX < coinRanXList[i] + 60:
                             closeX = True
 
                     if not closeX:
                         coinRanXList.append(newX)
 
-                coinRanX = False
+                while len(coinRanYList) < coinNum:
+                    newY = random.randint(-800, 0 - coinImg.get_height())
+                    coinRanYList.append(newY)
 
-            coinY += coinSpeed
-
+                coinRanInit = False
 
             for i in range(coinNum):
-                displayImg(mainSurface, coinImg, coinRanXList[i], coinY)
+                characterRect = characterImg.get_rect(topleft=(characterPos[0], characterPos[1]))
+                coinRect = coinImg.get_rect(topleft=(coinRanXList[i], coinRanYList[i]))
+
+                if characterRect.colliderect(coinRect):
+                    coinTouch = True
+
+                if coinRanYList[i] >= 610 or coinTouch:
+                    coinTouch = False
+
+                    coinRanYList[i] = random.randint(-500, 0 - coinImg.get_height())
+                    coinRanXList.pop(i)
+
+                    # '''
+                    while True:
+                        newX = random.randint(0, surfaceSize - coinImg.get_width())
+
+                        closeX = False
+                        for j in range(len(coinRanXList)):
+
+                            if coinRanXList[j] - 60 < newX and newX < coinRanXList[j] + 60:
+                                closeX = True
+
+                        if not closeX:
+                            coinRanXList[i] = newX
+                            print(coinRanXList)
+                            break
+
+                    # '''
+
+                else:
+                    coinRanYList[i] += coinSpeed
+
+            for i in range(coinNum):
+                displayImg(mainSurface, coinImg, coinRanXList[i], coinRanYList[i])
 
             characterPos[0] += characterSpeed[0]
             displayImg(mainSurface, characterImg, characterPos[0], characterPos[1])
