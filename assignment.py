@@ -57,6 +57,32 @@ def horizontalC(item, mainSurface):
     return int((mainSurface.get_width() - item.get_width()) // 2)
 
 
+def variableReset():
+    # Mouse click detection
+    mouseUp = False
+
+    # Variables for random XY coordinates of the coin
+    coinRanInit = True
+    coinRanXList = []
+    coinRanYList = []
+    coinNum = 6
+    coinSpeed = 5
+    coinTouch = False
+    coinPlayer = 0
+
+    # Variables for life
+    lifePlayer = 5
+    img = []
+
+    restart = False
+
+
+def itemInit(file, division):
+    itemInits = pygame.image.load(f'resources/{file}').convert_alpha()
+    itemInits = pygame.transform.smoothscale(itemInits, (itemInits.get_width() / division, itemInits.get_height() / division))
+    return itemInits
+
+
 def main():
     # -----------------------------Setup------------------------------------------------- #
     global mouseUp # MouseUp boolean to use in and out of the while loop
@@ -90,8 +116,8 @@ def main():
 
     # Characters Graphics
     coinImg = pygame.image.load('resources/coin.png').convert_alpha()
-    coinImg = pygame.transform.smoothscale(coinImg, (40, 40))
-    coinImgS = pygame.transform.smoothscale(coinImg, (30, 30))
+    coinImg = pygame.transform.smoothscale(coinImg, (coinImg.get_width()/3.85, coinImg.get_height()/3.85))
+    coinImgS = pygame.transform.smoothscale(coinImg, (coinImg.get_width()/1.3, coinImg.get_height()/1.3))
 
     characterImg = pygame.image.load('resources/character.png').convert_alpha()
     characterPos = [surfaceSize / 2, 600]  # X and Y Positions
@@ -106,7 +132,17 @@ def main():
     bombImg = pygame.image.load('resources/bomb.png').convert_alpha()
     bombImg = pygame.transform.smoothscale(bombImg,
                                            (bombImg.get_width() / 7, bombImg.get_height() / 7))
+    bombEImg = pygame.image.load('resources/bombExplosion.png').convert_alpha()
+    bombEImg = pygame.transform.smoothscale(bombEImg, (bombImg.get_width(), bombImg.get_height()))
 
+    cashImg = pygame.image.load('resources/cash.png').convert_alpha()
+    cashImg = pygame.transform.smoothscale(cashImg, (cashImg.get_width()/7, cashImg.get_height()/7))
+
+    taxImg = pygame.image.load('resources/tax.png').convert_alpha()
+    taxImg = pygame.transform.smoothscale(taxImg, (taxImg.get_width() / 12, taxImg.get_height() / 12))
+    #taxImg = itemInit("tax.png", 12)
+
+    #'''
     # Mouse click detection
     mouseUp = False
 
@@ -125,9 +161,11 @@ def main():
     for i in range(coinNum):
         img.append(coinImg)
 
+    restart = False
+    #'''
+
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
-
         # -----------------------------Event Handling------------------------------------#
         ev = pygame.event.poll()  # Look for any event
         if ev.type == pygame.QUIT:  # Window close button clicked?
@@ -174,7 +212,17 @@ def main():
                 startBttnC = (101, 128, 166)
 
         elif programState == "game":
+            '''
+            if restart:
+                print("test")
+                lifePlayer = 5
+                variableReset()
+                for i in range(coinNum):
+                    img.append(coinImg)
+            '''
+
             displayImg(mainSurface, bkgImg, 0, 0)
+            displayImg(mainSurface, taxImg, 100, 100)
 
             if coinRanInit:
                 while len(coinRanXList) < coinNum:
@@ -204,6 +252,7 @@ def main():
                     if img[i] == coinImg:
                         coinPlayer += 1
                     elif img[i] == bombImg:
+                        displayImg(mainSurface, bombEImg, coinRanXList[i], coinRanYList[i])
                         lifePlayer -= 1
 
                 if coinRanYList[i] >= 610 or coinTouch:
@@ -215,10 +264,10 @@ def main():
 
                     item = random.randint(0, 100)
 
-                    if item % 2 == 0:
-                        img[i] = coinImg
-                    else:
+                    if item % 10 == 0:
                         img[i] = bombImg
+                    else:
+                        img[i] = coinImg
 
                     while len(coinRanXList) != coinNum:
                         newX = random.randint(0, surfaceSize - coinImg.get_width())
@@ -258,6 +307,10 @@ def main():
             displayImg(mainSurface, coinImgS, 10, 10)
             coinText = createText(f'x {coinPlayer}', s=25, c=(255, 255, 255), b=True)
             mainSurface.blit(coinText, (15 + coinImgS.get_width(), 10))
+
+            if lifePlayer == 0:
+                restart = True
+                programState = 'main'
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
