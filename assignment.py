@@ -91,6 +91,7 @@ def main():
     # Characters Graphics
     coinImg = pygame.image.load('coin.png').convert_alpha()
     coinImg = pygame.transform.smoothscale(coinImg, (40, 40))
+    coinImgS = pygame.transform.smoothscale(coinImg, (30, 30))
 
     characterImg = pygame.image.load('character.png').convert_alpha()
     characterPos = [surfaceSize / 2, 600]  # X and Y Positions
@@ -109,6 +110,9 @@ def main():
     coinSpeed = 5
     coinTouch = False
     coinPlayer = 0
+
+    # Variables for life
+    lifePlayer = 5
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -213,7 +217,11 @@ def main():
                 else:
                     coinRanYList[i] += coinSpeed
 
+                # Displays the falling coins
                 displayImg(mainSurface, coinImg, coinRanXList[i], coinRanYList[i])
+
+            for i in range(lifePlayer):
+                
 
             # If character moves out of the surface, bounce it back
             if characterPos[0] <= 0:
@@ -221,11 +229,14 @@ def main():
             elif characterPos[0] >= surfaceSize - characterImg.get_width():
                 characterPos[0] = surfaceSize - characterImg.get_width() - 1
 
+            # Displays the character image
             characterPos[0] += characterSpeed[0]
             displayImg(mainSurface, characterImg, characterPos[0], characterPos[1])
 
-            #displayImg
-            displayImg(mainSurface, coinImg, 10, 10)
+            # Displays the number of coins with the coin image (top left corner)
+            displayImg(mainSurface, coinImgS, 10, 10)
+            coinText = createText(f'x {coinPlayer}', s=25, c=(255, 255, 255), b=True)
+            mainSurface.blit(coinText, (15 + coinImgS.get_width(), 10))
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
