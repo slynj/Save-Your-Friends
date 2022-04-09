@@ -105,7 +105,7 @@ def main():
 
     bombImg = pygame.image.load('resources/bomb.png').convert_alpha()
     bombImg = pygame.transform.smoothscale(bombImg,
-                                           (bombImg.get_width() / 20, bombImg.get_height() / 20))
+                                           (bombImg.get_width() / 7, bombImg.get_height() / 7))
 
     # Mouse click detection
     mouseUp = False
@@ -121,6 +121,9 @@ def main():
 
     # Variables for life
     lifePlayer = 5
+    img = []
+    for i in range(coinNum):
+        img.append(coinImg)
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -197,8 +200,11 @@ def main():
                 coinRect = coinImg.get_rect(topleft=(coinRanXList[i], coinRanYList[i]))
 
                 if characterRect.colliderect(coinRect):
-                    coinPlayer += 1
                     coinTouch = True
+                    if img[i] == coinImg:
+                        coinPlayer += 1
+                    elif img[i] == bombImg:
+                        lifePlayer -= 1
 
                 if coinRanYList[i] >= 610 or coinTouch:
 
@@ -206,6 +212,13 @@ def main():
 
                     coinRanYList[i] = random.randint(-500, 0 - coinImg.get_height())
                     coinRanXList.pop(i)
+
+                    item = random.randint(0, 100)
+
+                    if item % 2 == 0:
+                        img[i] = coinImg
+                    else:
+                        img[i] = bombImg
 
                     while len(coinRanXList) != coinNum:
                         newX = random.randint(0, surfaceSize - coinImg.get_width())
@@ -225,13 +238,11 @@ def main():
                     coinRanYList[i] += coinSpeed
 
                 # Displays the falling coins
-                displayImg(mainSurface, coinImg, coinRanXList[i], coinRanYList[i])
+                displayImg(mainSurface, img[i], coinRanXList[i], coinRanYList[i])
 
             for i in range(lifePlayer):
                 lifeImgX = surfaceSize - (i+1)*(lifeImg.get_width())
                 displayImg(mainSurface, lifeImg, lifeImgX, 10)
-
-            displayImg(mainSurface, bombImg, 100, 100)
 
             # If character moves out of the surface, bounce it back
             if characterPos[0] <= 0:
