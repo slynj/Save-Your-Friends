@@ -99,6 +99,10 @@ def main():
     characterImg = pygame.transform.smoothscale(characterImg,
                                                 (characterImg.get_width() / 2, characterImg.get_height() / 2))
 
+    lifeImg = pygame.image.load('heart.png').convert_alpha()
+    lifeImg = pygame.transform.smoothscale(lifeImg,
+                                                (lifeImg.get_width() / 50, lifeImg.get_height() / 50))
+
     # Mouse click detection
     mouseUp = False
 
@@ -197,7 +201,6 @@ def main():
                     coinTouch = False
 
                     coinRanYList[i] = random.randint(-500, 0 - coinImg.get_height())
-                    print(coinRanXList[i])
                     coinRanXList.pop(i)
 
                     while len(coinRanXList) != coinNum:
@@ -221,7 +224,8 @@ def main():
                 displayImg(mainSurface, coinImg, coinRanXList[i], coinRanYList[i])
 
             for i in range(lifePlayer):
-                
+                lifeImgX = surfaceSize - (i+1)*(lifeImg.get_width())
+                displayImg(mainSurface, lifeImg, lifeImgX, 10)
 
             # If character moves out of the surface, bounce it back
             if characterPos[0] <= 0:
