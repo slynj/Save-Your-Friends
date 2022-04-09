@@ -78,30 +78,34 @@ def main():
     programState = "game"
 
     # Title
-    titleImg = pygame.image.load('title.png')
+    titleImg = pygame.image.load('resources/title.png')
 
     # Start Button
     startBttn = createText("START", s=30, c=(255, 255, 255))
     startBttnC = (65, 104, 158)
 
     # Background
-    bkgImg = pygame.image.load('background.png').convert_alpha()
+    bkgImg = pygame.image.load('resources/background.png').convert_alpha()
     bkgImg = pygame.transform.smoothscale(bkgImg, (surfaceSize, surfaceSize))
 
     # Characters Graphics
-    coinImg = pygame.image.load('coin.png').convert_alpha()
+    coinImg = pygame.image.load('resources/coin.png').convert_alpha()
     coinImg = pygame.transform.smoothscale(coinImg, (40, 40))
     coinImgS = pygame.transform.smoothscale(coinImg, (30, 30))
 
-    characterImg = pygame.image.load('character.png').convert_alpha()
+    characterImg = pygame.image.load('resources/character.png').convert_alpha()
     characterPos = [surfaceSize / 2, 600]  # X and Y Positions
     characterSpeed = [0, 0]  # X and Y Speeds
     characterImg = pygame.transform.smoothscale(characterImg,
                                                 (characterImg.get_width() / 2, characterImg.get_height() / 2))
 
-    lifeImg = pygame.image.load('heart.png').convert_alpha()
+    lifeImg = pygame.image.load('resources/heart.png').convert_alpha()
     lifeImg = pygame.transform.smoothscale(lifeImg,
                                                 (lifeImg.get_width() / 50, lifeImg.get_height() / 50))
+
+    bombImg = pygame.image.load('resources/bomb.png').convert_alpha()
+    bombImg = pygame.transform.smoothscale(bombImg,
+                                           (bombImg.get_width() / 20, bombImg.get_height() / 20))
 
     # Mouse click detection
     mouseUp = False
@@ -226,6 +230,8 @@ def main():
             for i in range(lifePlayer):
                 lifeImgX = surfaceSize - (i+1)*(lifeImg.get_width())
                 displayImg(mainSurface, lifeImg, lifeImgX, 10)
+
+            displayImg(mainSurface, bombImg, 100, 100)
 
             # If character moves out of the surface, bounce it back
             if characterPos[0] <= 0:
