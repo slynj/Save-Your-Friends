@@ -105,9 +105,10 @@ def main():
     coinRanInit = True
     coinRanXList = []
     coinRanYList = []
-    coinNum = 10
+    coinNum = 6
     coinSpeed = 5
     coinTouch = False
+    coinPlayer = 0
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -167,7 +168,7 @@ def main():
                     closeX = False
                     for i in range(len(coinRanXList)):
 
-                        if coinRanXList[i] - 60 < newX and newX < coinRanXList[i] + 60:
+                        if coinRanXList[i] - 60 < newX < coinRanXList[i] + 60:
                             closeX = True
 
                     if not closeX:
@@ -184,44 +185,47 @@ def main():
                 coinRect = coinImg.get_rect(topleft=(coinRanXList[i], coinRanYList[i]))
 
                 if characterRect.colliderect(coinRect):
+                    coinPlayer += 1
                     coinTouch = True
 
                 if coinRanYList[i] >= 610 or coinTouch:
+
                     coinTouch = False
 
                     coinRanYList[i] = random.randint(-500, 0 - coinImg.get_height())
+                    print(coinRanXList[i])
                     coinRanXList.pop(i)
 
-                    # '''
-                    while True:
+                    while len(coinRanXList) != coinNum:
                         newX = random.randint(0, surfaceSize - coinImg.get_width())
 
                         closeX = False
                         for j in range(len(coinRanXList)):
 
-                            if coinRanXList[j] - 60 < newX and newX < coinRanXList[j] + 60:
+                            if coinRanXList[j] - 1.5*coinImg.get_width() < newX < \
+                                    coinRanXList[j] + 1.5*coinImg.get_width():
                                 closeX = True
 
                         if not closeX:
-                            coinRanXList[i] = newX
-                            print(coinRanXList)
+                            coinRanXList.insert(i, newX)
                             break
-
-                    # '''
 
                 else:
                     coinRanYList[i] += coinSpeed
 
-            for i in range(coinNum):
                 displayImg(mainSurface, coinImg, coinRanXList[i], coinRanYList[i])
 
-            characterPos[0] += characterSpeed[0]
-            displayImg(mainSurface, characterImg, characterPos[0], characterPos[1])
-
+            # If character moves out of the surface, bounce it back
             if characterPos[0] <= 0:
                 characterPos[0] = 1
             elif characterPos[0] >= surfaceSize - characterImg.get_width():
                 characterPos[0] = surfaceSize - characterImg.get_width() - 1
+
+            characterPos[0] += characterSpeed[0]
+            displayImg(mainSurface, characterImg, characterPos[0], characterPos[1])
+
+            #displayImg
+            displayImg(mainSurface, coinImg, 10, 10)
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
