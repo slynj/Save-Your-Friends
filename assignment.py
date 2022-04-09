@@ -114,33 +114,23 @@ def main():
     bkgImg = pygame.image.load('resources/background.png').convert_alpha()
     bkgImg = pygame.transform.smoothscale(bkgImg, (surfaceSize, surfaceSize))
 
-    # Characters Graphics
-    coinImg = pygame.image.load('resources/coin.png').convert_alpha()
-    coinImg = pygame.transform.smoothscale(coinImg, (coinImg.get_width()/3.85, coinImg.get_height()/3.85))
-    coinImgS = pygame.transform.smoothscale(coinImg, (coinImg.get_width()/1.3, coinImg.get_height()/1.3))
-
-    characterImg = pygame.image.load('resources/character.png').convert_alpha()
+    # Character movement variables
     characterPos = [surfaceSize / 2, 600]  # X and Y Positions
     characterSpeed = [0, 0]  # X and Y Speeds
-    characterImg = pygame.transform.smoothscale(characterImg,
-                                                (characterImg.get_width() / 2, characterImg.get_height() / 2))
 
-    lifeImg = pygame.image.load('resources/heart.png').convert_alpha()
-    lifeImg = pygame.transform.smoothscale(lifeImg,
-                                                (lifeImg.get_width() / 50, lifeImg.get_height() / 50))
+    # Item Graphics
+    coinImg = itemInit("coin.png", 3.85)
+    characterImg = itemInit("character.png", 2)
+    lifeImg = itemInit("heart.png", 50)
+    bombImg = itemInit("bomb.png", 7)
+    cashImg = itemInit("cash.png", 7)
+    taxImg = itemInit("tax.png", 12)
+    exclaImg = itemInit("exclamation.png", 12)
 
-    bombImg = pygame.image.load('resources/bomb.png').convert_alpha()
-    bombImg = pygame.transform.smoothscale(bombImg,
-                                           (bombImg.get_width() / 7, bombImg.get_height() / 7))
     bombEImg = pygame.image.load('resources/bombExplosion.png').convert_alpha()
     bombEImg = pygame.transform.smoothscale(bombEImg, (bombImg.get_width(), bombImg.get_height()))
 
-    cashImg = pygame.image.load('resources/cash.png').convert_alpha()
-    cashImg = pygame.transform.smoothscale(cashImg, (cashImg.get_width()/7, cashImg.get_height()/7))
-
-    taxImg = pygame.image.load('resources/tax.png').convert_alpha()
-    taxImg = pygame.transform.smoothscale(taxImg, (taxImg.get_width() / 12, taxImg.get_height() / 12))
-    #taxImg = itemInit("tax.png", 12)
+    coinImgS = pygame.transform.smoothscale(coinImg, (coinImg.get_width() / 1.3, coinImg.get_height() / 1.3))
 
     #'''
     # Mouse click detection
@@ -222,7 +212,6 @@ def main():
             '''
 
             displayImg(mainSurface, bkgImg, 0, 0)
-            displayImg(mainSurface, taxImg, 100, 100)
 
             if coinRanInit:
                 while len(coinRanXList) < coinNum:
@@ -251,9 +240,19 @@ def main():
                     coinTouch = True
                     if img[i] == coinImg:
                         coinPlayer += 1
+
+                    elif img[i] == cashImg:
+                        coinPlayer += 5
+
                     elif img[i] == bombImg:
                         displayImg(mainSurface, bombEImg, coinRanXList[i], coinRanYList[i])
                         lifePlayer -= 1
+
+                    elif img[i] == taxImg:
+                        displayImg(mainSurface, exclaImg, coinRanXList[i], coinRanYList[i])
+                        coinPlayer = int(coinPlayer*0.9)
+                        if coinPlayer < 0:
+                            coinPlayer = 0
 
                 if coinRanYList[i] >= 610 or coinTouch:
 
@@ -266,6 +265,10 @@ def main():
 
                     if item % 10 == 0:
                         img[i] = bombImg
+                    elif item % 13 == 0:
+                        img[i] = cashImg
+                    elif item % 19 == 0:
+                        img[i] = taxImg
                     else:
                         img[i] = coinImg
 
