@@ -1,28 +1,65 @@
 # -----------------------------------------------------------------------------
-# Name:        Assignment Template (assignment.py)
-# Purpose:     A description of your program goes here.
-#
+# Name:        mini-game-p4-slynj — Save Your Friend! (assignment.py)
+# Purpose:     Save Your Friend! is a mini control game made using Pygame. The purpose of this
+#              project is to demonstrate the understanding of collision detection in pygame along
+#              with the knowledge of lists, functions and library usage. In this game, various types
+#              of items falls down from the sky, and the player controls the character arrow keys:
+#              avoiding and colliding to items.
 # Author:      Lyn Jeong
-# Created:     13-Sept-2020
-# Updated:     13-Sept-2020
+# Created:     01-April-2022
+# Updated:     10-April-2022
 # ---------------------------------------------------------------------------------------#
-# I think this project deserves a level XXXXXX because ...
+# I think this project deserves a level 4+ because it demonstrates all of the level 4 criteria with
+# many extra features improving the game.
 #
 # Features Added:
-#   ...
-#   ...
-#   ...
+#   - background music
+#       -> toggle button to turn on/off
+#   - time module used
+#       -> calculates how long user played the game (minutes/seconds)
+#       -> increases the items' falling speed every 5 second
+#   - random module used
+#       -> random items falling (coin/cash/bomb/tax)
+#       -> random x coordinates
+#       -> random y coordinates
+#   - different items falling with collision detection
+#       -> distinguishes the object touched, adding/subtracting certain values depending on the item
+#   - program state used
+#       -> program state used to distinguish start/game/end screen
+#       -> replayable
+#       -> can exit the game during game play (exit button)
+#   - item collision indication
+#       -> bomb/tax shows a different version of the graphic when touched to indicate that user have
+#          collided to those items
+#   - different ending screen depending on the score
+#   - increasingly gets faster
+#       -> item falling speed and character moving speed increases, making it harder to play
 # ---------------------------------------------------------------------------------------#
+# Image & Code Credits
 # coin https://stock.adobe.com/search?k=8+bit+coin&asset_id=392227316
 # character https://openclipart.org/detail/248259/retro-character-sprite-sheet
+# character controlling logic — Mr. Brooks https://github.com/HDSB-GWS/ICS3-Python-Notes/bl
+#                                           ob/master/notes/41%20-%20PyGame/07.%20events%20-%20speed.py
+# ---------------------------------------------------------------------------------------#
+
+# Import library / modules
 import pygame
 import random
 import time
 import math
 
+# Variables initial setup (written outside of function to use it as a global variable)
 mouseUp = False
 characterSpeed = [0, 0]
-# Variables for random XY coordinates of the coin
+keySpeed = 5
+
+musicOn = True
+restart = False
+level = 1
+lifePlayer = 5
+img = []
+
+# Variables coins (items)
 coinRanInit = True
 coinRanXList = []
 coinRanYList = []
@@ -30,18 +67,13 @@ coinNum = 10
 coinSpeed = 5
 coinTouch = False
 coinPlayer = 0
-# Variables for life
-lifePlayer = 5
-img = []
-restart = False
-level = 1
-keySpeed = 5
+
+# Variables for time
 startTime = 0
 endTime = 0
 timeDiff = 0
 checkP1 = 0
 checkP2 = 0
-musicOn = True
 
 
 # Receives a string and other characters of a text and returns a rendered text
@@ -82,16 +114,22 @@ def horizontalC(item, mainSurface):
     return int((mainSurface.get_width() - item.get_width()) // 2)
 
 
+# Resets all the global variables before restarting the game
 def variableReset():
     global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
-        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
+        img, restart, level, keySpeed, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
 
     mouseUp = False
+    characterSpeed = [0, 0]
+    keySpeed = 5
 
-    # Character movement variables
-    characterSpeed = [0, 0]  # X and Y Speeds
+    musicOn = True
+    restart = False
+    level = 1
+    lifePlayer = 5
+    img = []
 
-    # Variables for random XY coordinates of the coin
+    # Variables coins (items)
     coinRanInit = True
     coinRanXList = []
     coinRanYList = []
@@ -100,31 +138,26 @@ def variableReset():
     coinTouch = False
     coinPlayer = 0
 
-    # Variables for life
-    lifePlayer = 5
-
-    img = []
-    restart = False
-    level = 1
-    keySpeed = 5
-
+    # Variables for time
     startTime = 0
     endTime = 0
     timeDiff = 0
+    checkP1 = 0
+    checkP2 = 0
 
-    musicOn = True
 
-
+# Image files size initialization
 def itemInit(file, division):
     itemInits = pygame.image.load(f'resources/{file}').convert_alpha()
     itemInits = pygame.transform.smoothscale(itemInits, (itemInits.get_width() / division, itemInits.get_height() / division))
     return itemInits
 
 
+# Main Program
 def main():
     # -----------------------------Setup------------------------------------------------- #
     global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
-        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
+        img, restart, level, keySpeed, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
 
     pygame.init()  # Prepare the pygame module for use
     pygame.font.init()
@@ -201,48 +234,54 @@ def main():
 
     coinImgS = pygame.transform.smoothscale(coinImg, (coinImg.get_width() / 1.3, coinImg.get_height() / 1.3))
 
+    # The first 10 items are always all coins
     variableReset()
     for i in range(coinNum):
         img.append(coinImg)
 
-    #effect = pygame.mixer.Sound('resources/backgroundMuisc.mp3')
-    #effect.play()
+    # Start background music (infinitely play it)
     pygame.mixer.music.load('resources/backgroundMuisc.mp3')
     pygame.mixer.music.play(-1)
 
     # -----------------------------Main Game Loop---------------------------------------- #
     while True:
         # -----------------------------Event Handling------------------------------------ #
-        ev = pygame.event.poll()  # Look for any event
-        if ev.type == pygame.QUIT:  # Window close button clicked?
+        ev = pygame.event.poll()
+        # Window close button
+        if ev.type == pygame.QUIT:
             break  # ... leave game loop
 
+        # Mouse Click Bool
         if ev.type == pygame.MOUSEBUTTONUP:
             mouseUp = True
         else:
             mouseUp = False
 
+        # Keyboard pressed
         if ev.type == pygame.KEYDOWN:
             if programState == "game":
+                # From Mr. Brooks (credit at the top)
                 if ev.key == pygame.K_LEFT:
                     characterSpeed[0] -= keySpeed
                 elif ev.key == pygame.K_RIGHT:
                     characterSpeed[0] += keySpeed
 
+        # Keyboard released
         if ev.type == pygame.KEYUP:
             if programState == "game":
                 characterSpeed[0] = 0
 
         mouse = pygame.mouse.get_pos()
 
+        # Constant colours for buttons
         BUTTNBLUE = (184, 199, 219)
         BUTTNHOVER = (101, 128, 166)
         WHITE = (255, 255, 255)
 
-        # ----------------------------- Game Logic/Drawing --------------------------------#
-        # So first fill everything with the background color
+        # ----------------------------- Game Logic / Drawing --------------------------------#
         mainSurface.fill((118, 150, 194))
 
+        # MAIN SCREEN
         if programState == "main":
             displayImg(mainSurface, titleImg, horizontalC(titleImg, mainSurface), surfaceSize / 2.5)
             displayImg(mainSurface, islandImg, horizontalC(islandImg, mainSurface)-10, surfaceSize/5)
@@ -283,7 +322,9 @@ def main():
             else:
                 musicBttnC = BUTTNHOVER
 
+        # GAME SCREEN
         elif programState == "game":
+            # if it is a new game, reset everything
             if restart:
                 variableReset()
 
@@ -292,30 +333,36 @@ def main():
 
                 characterPos = [surfaceSize / 2, 600]  # X and Y Positions
 
+            # Background image
             displayImg(mainSurface, bkgImg, 0, 0)
 
+            # Coin (and other items) initialization (XY, Speed, time)
             if coinRanInit:
+                # Mark time
                 checkP1 = time.time()
                 startTime = time.time()
 
+                # Gets random X values that are not close to each other
                 while len(coinRanXList) < coinNum:
                     newX = random.randint(0, surfaceSize - coinImg.get_width())
 
                     closeX = False
                     for i in range(len(coinRanXList)):
-
+                        # if the random number is with in this range, get a new number
                         if coinRanXList[i] - 50 < newX < coinRanXList[i] + 50:
                             closeX = True
 
                     if not closeX:
                         coinRanXList.append(newX)
 
+                # Get random Y value
                 while len(coinRanYList) < coinNum:
                     newY = random.randint(-800, 0 - coinImg.get_height())
                     coinRanYList.append(newY)
 
                 coinRanInit = False
 
+            # calculate the time, if 5 seconds have passed, increased the speed
             checkP2 = time.time()
             if (checkP2 - checkP1) >= 5:
                 checkP1 = checkP2
@@ -323,9 +370,11 @@ def main():
                 keySpeed += 1
 
             for i in range(coinNum):
+                # Get XY coordinates of character and items
                 characterRect = characterImg.get_rect(topleft=(characterPos[0], characterPos[1]))
                 coinRect = coinImg.get_rect(topleft=(coinRanXList[i], coinRanYList[i]))
 
+                # If collision is detected, check what item it is and add/subtract the coin or life
                 if characterRect.colliderect(coinRect):
                     coinTouch = True
                     if img[i] == coinImg:
@@ -346,6 +395,7 @@ def main():
                         if coinPlayer < 0:
                             coinPlayer = 0
 
+                # If the items touch the character or the ground get a random XY value and a random item
                 if coinRanYList[i] >= 610 or coinTouch:
 
                     coinTouch = False
@@ -355,6 +405,7 @@ def main():
 
                     item = random.randint(0, 100)
 
+                    # different possibilites of the item
                     if item % 5 == 0:
                         img[i] = bombImg
                     elif item % 13 == 0:
@@ -364,6 +415,7 @@ def main():
                     else:
                         img[i] = coinImg
 
+                    # Same logic used at the initializing state at the top (rand XY)
                     while len(coinRanXList) != coinNum:
                         newX = random.randint(0, surfaceSize - coinImg.get_width())
 
@@ -383,6 +435,7 @@ def main():
                 # Displays the falling coins
                 displayImg(mainSurface, img[i], coinRanXList[i], coinRanYList[i])
 
+            # Draw the number of lives left (hart)
             for i in range(lifePlayer):
                 lifeImgX = surfaceSize - (i+1)*(lifeImg.get_width())
                 displayImg(mainSurface, lifeImg, lifeImgX, 10)
@@ -410,11 +463,13 @@ def main():
             createBttn(mainSurface, musicBttn, surfaceSize * 0.857, surfaceSize * 0.95, musicBttnC)
             musicBttnHov = bttnDimension(mouse, musicBttn, surfaceSize * 0.857, surfaceSize * 0.95)
 
+            # If exit button is clicked, change the state to main
             if exitBttnHov:
                 exitBttnC = (140, 116, 98)
                 if mouseUp:
                     restart = True
                     programState = 'main'
+            # If music button is clicked, toggle the music (ON/OFF)
             elif musicBttnHov:
                 musicBttnC = (140, 116, 98)
                 if mouseUp:
@@ -428,16 +483,20 @@ def main():
                 exitBttnC = (112, 79, 55)
                 musicBttnC = (112, 79, 55)
 
+            # If life is 0, record the endTime, be ready to reset the variables, and change the state to end
             if lifePlayer == 0:
                 endTime = time.time()
                 restart = True
                 programState = 'end'
 
+        # END SCREEN
         if programState == "end":
+            # Units for the time are blank and time calculation
             unit = ''
             unit2 = ''
             timeDiff = endTime - startTime
 
+            # Different end screen depending on the number of coins
             if coinPlayer < 10:
                 displayImg(mainSurface, noFriendsImg, 0, 0)
             if coinPlayer >= 10:
@@ -449,9 +508,11 @@ def main():
             if coinPlayer >= 60:
                 displayImg(mainSurface, twentyFriendsImg, 0, 0)
 
+            # Display the number of coins earned
             resultText = createText(f'{coinPlayer}', s=50, c=WHITE, b=True)
             mainSurface.blit(resultText, (surfaceSize*0.57, surfaceSize*0.3))
 
+            # If the time is more than 60 seconds, display it as ___ minutes ___ seconds
             if timeDiff < 60:
                 timeDiff = int(timeDiff)
                 unit = 'seconds'
@@ -463,10 +524,11 @@ def main():
                 if timeDiff == 1:
                     unit = 'minute'
 
-            # Music button
+            # Music button (different colour)
             createBttn(mainSurface, musicBttn, surfaceSize * 0.857, surfaceSize * 0.02, musicBttnC)
             musicBttnHov = bttnDimension(mouse, musicBttn, surfaceSize * 0.857, surfaceSize * 0.02)
 
+            # Same logic as the one in the main/game state
             if musicBttnHov:
                 musicBttnC = BUTTNBLUE
                 if mouseUp:
@@ -479,19 +541,23 @@ def main():
             else:
                 musicBttnC = BUTTNHOVER
 
+            # Display the time as ___seconds or ___minutes ___seconds
             resultText = createText(f'{timeDiff} {unit} {unit2}', s=35, c=WHITE, i=True)
             mainSurface.blit(resultText, (horizontalC(resultText, mainSurface), surfaceSize*0.43))
 
+            # Draw the buttons
             createBttn(mainSurface, homeBttn, surfaceSize/2 - 130, surfaceSize*0.9, homeBttnC)
             homeBttnHov = bttnDimension(mouse, homeBttn, surfaceSize/2 - 130, surfaceSize*0.9)
             createBttn(mainSurface, replayBttn, surfaceSize/2 + 30, surfaceSize*0.9, replayBttnC)
             replayBttnHov = bttnDimension(mouse, replayBttn, surfaceSize/2 + 30, surfaceSize*0.9)
 
+            # If home button is clicked, go back to the main screen
             if homeBttnHov:
                 homeBttnC = BUTTNBLUE
                 if mouseUp:
                     programState = "main"
                     mouseUp = False
+            # If replay button is clicked, go back to the game screen
             elif replayBttnHov:
                 replayBttnC = BUTTNBLUE
                 if mouseUp:
