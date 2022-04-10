@@ -1,18 +1,20 @@
-# -----------------------------------------------------------------------------
-# Name:        mini-game-p4-slynj — Save Your Friend! (assignment.py)
-# Purpose:     Save Your Friend! is a mini control game made using Pygame. The purpose of this
+# ----------------------------------------------------------------------------- #
+# Name:        mini-game-p4-slynj — Save Your Friends! (assignment.py)
+# Purpose:     Save Your Friends! is a mini control game made using Pygame. The purpose of this
 #              project is to demonstrate the understanding of collision detection in pygame along
 #              with the knowledge of lists, functions and library usage. In this game, various types
-#              of items falls down from the sky, and the player controls the character arrow keys:
-#              avoiding and colliding to items.
+#              of items falls down from the sky, and the player controls the character with arrow keys.
+#              The goal is to get as many coins while maintaining the life.
 # Author:      Lyn Jeong
 # Created:     01-April-2022
 # Updated:     10-April-2022
-# ---------------------------------------------------------------------------------------#
+# --------------------------------------------------------------------------------------- #
 # I think this project deserves a level 4+ because it demonstrates all of the level 4 criteria with
 # many extra features improving the game.
 #
 # Features Added:
+#   - image usage
+#       -> image used for items/characters
 #   - background music
 #       -> toggle button to turn on/off
 #   - time module used
@@ -34,13 +36,13 @@
 #   - different ending screen depending on the score
 #   - increasingly gets faster
 #       -> item falling speed and character moving speed increases, making it harder to play
-# ---------------------------------------------------------------------------------------#
+# --------------------------------------------------------------------------------------- #
 # Image & Code Credits
 # coin https://stock.adobe.com/search?k=8+bit+coin&asset_id=392227316
 # character https://openclipart.org/detail/248259/retro-character-sprite-sheet
 # character controlling logic — Mr. Brooks https://github.com/HDSB-GWS/ICS3-Python-Notes/bl
 #                                           ob/master/notes/41%20-%20PyGame/07.%20events%20-%20speed.py
-# ---------------------------------------------------------------------------------------#
+# --------------------------------------------------------------------------------------- #
 
 # Import library / modules
 import pygame
@@ -168,7 +170,7 @@ def main():
     # Create surface of (width, height), and its window.
     mainSurface = pygame.display.set_mode((surfaceSize, surfaceSize))
 
-    pygame.display.set_caption("Save Your Friends")
+    pygame.display.set_caption("Save Your Friends!")
 
     # -----------------------------Program Variable Initialization----------------------- #
     # Set up some data to describe a small circle and its color
