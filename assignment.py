@@ -267,6 +267,22 @@ def main():
 
             createBttn(mainSurface, helpBttn, surfaceSize*0.02, surfaceSize-surfaceSize*0.06, helpBttnC)
 
+            # Music button
+            createBttn(mainSurface, musicBttn, surfaceSize * 0.857, surfaceSize * 0.02, musicBttnC)
+            musicBttnHov = bttnDimension(mouse, musicBttn, surfaceSize * 0.857, surfaceSize * 0.02)
+
+            if musicBttnHov:
+                musicBttnC = BUTTNBLUE
+                if mouseUp:
+                    if musicOn:
+                        musicOn = False
+                        pygame.mixer.music.stop()
+                    else:
+                        musicOn = True
+                        pygame.mixer.music.play(-1)
+            else:
+                musicBttnC = BUTTNHOVER
+
         elif programState == "game":
             if restart:
                 variableReset()
@@ -446,6 +462,22 @@ def main():
 
                 if timeDiff == 1:
                     unit = 'minute'
+
+            # Music button
+            createBttn(mainSurface, musicBttn, surfaceSize * 0.857, surfaceSize * 0.02, musicBttnC)
+            musicBttnHov = bttnDimension(mouse, musicBttn, surfaceSize * 0.857, surfaceSize * 0.02)
+
+            if musicBttnHov:
+                musicBttnC = BUTTNBLUE
+                if mouseUp:
+                    if musicOn:
+                        musicOn = False
+                        pygame.mixer.music.stop()
+                    else:
+                        musicOn = True
+                        pygame.mixer.music.play(-1)
+            else:
+                musicBttnC = BUTTNHOVER
 
             resultText = createText(f'{timeDiff} {unit} {unit2}', s=35, c=WHITE, i=True)
             mainSurface.blit(resultText, (horizontalC(resultText, mainSurface), surfaceSize*0.43))
