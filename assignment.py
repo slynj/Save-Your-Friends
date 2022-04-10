@@ -17,6 +17,7 @@
 # character https://openclipart.org/detail/248259/retro-character-sprite-sheet
 import pygame
 import random
+import time
 
 mouseUp = False
 characterSpeed = [0, 0]
@@ -34,7 +35,12 @@ img = []
 restart = False
 level = 1
 keySpeed = 5
-time = 0
+startTime = 0
+endTime = 0
+timeDiff = 0
+checkP1 = 0
+checkP2 = 0
+checkDiff = 0
 
 
 # Receives a string and other characters of a text and returns a rendered text
@@ -76,7 +82,8 @@ def horizontalC(item, mainSurface):
 
 
 def variableReset():
-    global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, img, restart, level, keySpeed, time, characterSpeed
+    global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
+        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkDiff, checkP1, checkP2
 
     mouseUp = False
 
@@ -99,7 +106,10 @@ def variableReset():
     restart = False
     level = 1
     keySpeed = 5
-    time = 0
+
+    startTime = 0
+    endTime = 0
+    timeDiff = 0
 
 
 def itemInit(file, division):
@@ -110,7 +120,8 @@ def itemInit(file, division):
 
 def main():
     # -----------------------------Setup------------------------------------------------- #
-    global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, img, restart, level, keySpeed, time, characterSpeed
+    global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
+        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkDiff, checkP1, checkP2
 
     pygame.init()  # Prepare the pygame module for use
     pygame.font.init()
@@ -171,17 +182,19 @@ def main():
         if ev.type == pygame.QUIT:  # Window close button clicked?
             break  # ... leave game loop
 
-        elif ev.type == pygame.MOUSEBUTTONUP:
+        if ev.type == pygame.MOUSEBUTTONUP:
             mouseUp = True
+        else:
+            mouseUp = False
 
-        elif ev.type == pygame.KEYDOWN:
+        if ev.type == pygame.KEYDOWN:
             if programState == "game":
                 if ev.key == pygame.K_LEFT:
                     characterSpeed[0] -= keySpeed
                 elif ev.key == pygame.K_RIGHT:
                     characterSpeed[0] += keySpeed
 
-        elif ev.type == pygame.KEYUP:
+        if ev.type == pygame.KEYUP:
             if programState == "game":
                 characterSpeed[0] = 0
 
@@ -196,6 +209,7 @@ def main():
         mainSurface.fill((118, 150, 194))
 
         if programState == "main":
+            mainSurface.fill((118, 150, 194))
             # mainSurface.blit(mainTitle, (horizontalC(mainTitle, mainSurface), surfaceSize / 2))
             displayImg(mainSurface, titleImg, horizontalC(titleImg, mainSurface), surfaceSize / 2.5)
             # mainSurface, text, textX, textY, c = (0, 0, 0)
@@ -212,6 +226,7 @@ def main():
                 startBttnC = (101, 128, 166)
 
         elif programState == "game":
+            mainSurface.fill((118, 150, 194))
 
             if restart:
                 variableReset()
@@ -224,6 +239,8 @@ def main():
             displayImg(mainSurface, bkgImg, 0, 0)
 
             if coinRanInit:
+                startTime = time.time()
+
                 while len(coinRanXList) < coinNum:
                     newX = random.randint(0, surfaceSize - coinImg.get_width())
 
@@ -241,27 +258,33 @@ def main():
                     coinRanYList.append(newY)
 
                 coinRanInit = False
-
+            '''
             # level up by time
             time += 1
             if time > 1000:
                 time = 0
                 coinSpeed += 2
                 keySpeed += 2
+            '''
 
             '''
-            time += pygame.time.get_ticks()
-            print(time)
+            time = pygame.time.get_ticks()
 
-            if time > 10000:
-                time = 0
+            if time >= 10000*level:
+                level += 1
                 print("workd")
-                coinSpeed += 30
+                coinSpeed += 2
                 keySpeed += 2
                 #characterSpeed[0] += 100
-            else:
-                time = 0
-            '''
+            #'''
+            #print(startTime)
+            #print(checkP1)
+
+            checkP1 = time.time()
+            if (checkP1 - startTime) >= 10:
+                startTime = checkP1
+                coinSpeed += 2
+                keySpeed += 2
 
             for i in range(coinNum):
                 characterRect = characterImg.get_rect(topleft=(characterPos[0], characterPos[1]))
@@ -311,8 +334,7 @@ def main():
                         closeX = False
                         for j in range(len(coinRanXList)):
 
-                            if coinRanXList[j] - 1.5*coinImg.get_width() < newX < \
-                                    coinRanXList[j] + 1.5*coinImg.get_width():
+                            if coinRanXList[j] - 1.2*coinImg.get_width() < newX < coinRanXList[j] + 1.2*coinImg.get_width():
                                 closeX = True
 
                         if not closeX:
@@ -349,6 +371,7 @@ def main():
                 programState = 'end'
 
         if programState == "end":
+            mainSurface.fill((118, 150, 194))
             createBttn(mainSurface, homeBttn, horizontalC(homeBttn, mainSurface), surfaceSize - surfaceSize / 3,
                        homeBttnC)
             homeBttnHov = bttnDimension(mouse, homeBttn, horizontalC(homeBttn, mainSurface),
@@ -360,7 +383,6 @@ def main():
                     mouseUp = False
             else:
                 homeBttnC = (101, 128, 166)
-
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
