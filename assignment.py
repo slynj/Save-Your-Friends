@@ -18,6 +18,7 @@
 import pygame
 import random
 import time
+import math
 
 mouseUp = False
 characterSpeed = [0, 0]
@@ -40,7 +41,6 @@ endTime = 0
 timeDiff = 0
 checkP1 = 0
 checkP2 = 0
-checkDiff = 0
 
 
 # Receives a string and other characters of a text and returns a rendered text
@@ -83,7 +83,7 @@ def horizontalC(item, mainSurface):
 
 def variableReset():
     global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
-        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkDiff, checkP1, checkP2
+        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2
 
     mouseUp = False
 
@@ -121,7 +121,7 @@ def itemInit(file, division):
 def main():
     # -----------------------------Setup------------------------------------------------- #
     global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
-        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkDiff, checkP1, checkP2
+        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2
 
     pygame.init()  # Prepare the pygame module for use
     pygame.font.init()
@@ -137,27 +137,43 @@ def main():
     # -----------------------------Program Variable Initialization----------------------- #
     # Set up some data to describe a small circle and its color
     # Game Setup
-    programState = "game"
+    programState = "main"
+
+    # Theme Colour
+    BLUE = (65, 104, 158)
+    WHITE = (255, 255, 255)
 
     # Title
     titleImg = pygame.image.load('resources/title.png')
 
     # Start Button
-    startBttn = createText("START", s=30, c=(255, 255, 255))
-    startBttnC = (65, 104, 158)
+    startBttn = createText("START", s=30, c=WHITE)
+    startBttnC = BLUE
 
     # Background
     bkgImg = pygame.image.load('resources/background.png').convert_alpha()
     bkgImg = pygame.transform.smoothscale(bkgImg, (surfaceSize, surfaceSize))
 
     # Home Button
-    homeBttn = createText("HOME", s=30, c=(255, 255, 255))
-    homeBttnC = (65, 104, 158)
+    homeBttn = createText("HOME", s=30, c=WHITE)
+    homeBttnC = BLUE
+
+    # Help Button
+    helpBttn = createText(" ? ", s=30, c=WHITE)
+    helpBttnC = BLUE
+
+    # Replay Button
+    replayBttn = createText("REPLAY", s=30, c=WHITE)
+    replayBttnC = BLUE
+
+    # Exit Button
+    exitBttn = createText("EXIT", s=25, c=WHITE, i=True)
+    exitBttnC = (112, 79, 55)
 
     # Character movement variables
     characterPos = [surfaceSize / 2, 600]  # X and Y Positions
 
-    # Item Graphics
+    # Item Graphics size initializing
     coinImg = itemInit("coin.png", 3.85)
     characterImg = itemInit("character.png", 2)
     lifeImg = itemInit("heart.png", 50)
@@ -165,6 +181,13 @@ def main():
     cashImg = itemInit("cash.png", 7)
     taxImg = itemInit("tax.png", 12)
     exclaImg = itemInit("exclamation.png", 12)
+    islandImg = itemInit("island.png", 2)
+    rulesImg = itemInit("rules.png", 1)
+    noFriendsImg = itemInit("noFriends.png", 1)
+    oneFriendImg = itemInit("oneFriend.png", 1)
+    twoFriendsImg = itemInit("twoFriends.png", 1)
+    tenFriendsImg = itemInit("tenFriends.png", 1)
+    twentyFriendsImg = itemInit("twentyFriends.png", 1)
 
     bombEImg = pygame.image.load('resources/bombExplosion.png').convert_alpha()
     bombEImg = pygame.transform.smoothscale(bombEImg, (bombImg.get_width(), bombImg.get_height()))
@@ -175,9 +198,9 @@ def main():
     for i in range(coinNum):
         img.append(coinImg)
 
-    # -----------------------------Main Game Loop----------------------------------------#
+    # -----------------------------Main Game Loop---------------------------------------- #
     while True:
-        # -----------------------------Event Handling------------------------------------#
+        # -----------------------------Event Handling------------------------------------ #
         ev = pygame.event.poll()  # Look for any event
         if ev.type == pygame.QUIT:  # Window close button clicked?
             break  # ... leave game loop
@@ -200,34 +223,39 @@ def main():
 
         mouse = pygame.mouse.get_pos()
 
-        # -----------------------------Game Logic----------------------------------------#
-        # Update your game objects and data structures here...
+        BUTTNBLUE = (184, 199, 219)
+        BUTTNHOVER = (101, 128, 166)
+        WHITE = (255, 255, 255)
 
-        # -----------------------------Drawing Everything--------------------------------#
-        # We draw everything from scratch on each frame.
+        # ----------------------------- Game Logic/Drawing --------------------------------#
         # So first fill everything with the background color
         mainSurface.fill((118, 150, 194))
 
         if programState == "main":
-            mainSurface.fill((118, 150, 194))
-            # mainSurface.blit(mainTitle, (horizontalC(mainTitle, mainSurface), surfaceSize / 2))
             displayImg(mainSurface, titleImg, horizontalC(titleImg, mainSurface), surfaceSize / 2.5)
-            # mainSurface, text, textX, textY, c = (0, 0, 0)
+            displayImg(mainSurface, islandImg, horizontalC(islandImg, mainSurface)-10, surfaceSize/5)
+            displayImg(mainSurface, characterImg, horizontalC(characterImg, mainSurface)+50, surfaceSize/3.8)
+
             createBttn(mainSurface, startBttn, horizontalC(startBttn, mainSurface), surfaceSize - surfaceSize / 3,
                        startBttnC)
-            # bttnDimension(mouse, text, textX, textY)
             startBttnHov = bttnDimension(mouse, startBttn, horizontalC(startBttn, mainSurface),
                                          surfaceSize - surfaceSize / 3)
+            helpBttnHov = bttnDimension(mouse, helpBttn, surfaceSize*0.02, surfaceSize-surfaceSize*0.06)
+
             if startBttnHov:
-                startBttnC = (184, 199, 219)
+                startBttnC = BUTTNBLUE
                 if mouseUp:
                     programState = "game"
+            elif helpBttnHov:
+                displayImg(mainSurface, rulesImg, 0,0)
+                helpBttnC = BUTTNBLUE
             else:
-                startBttnC = (101, 128, 166)
+                startBttnC = BUTTNHOVER
+                helpBttnC = BUTTNHOVER
+
+            createBttn(mainSurface, helpBttn, surfaceSize*0.02, surfaceSize-surfaceSize*0.06, helpBttnC)
 
         elif programState == "game":
-            mainSurface.fill((118, 150, 194))
-
             if restart:
                 variableReset()
 
@@ -239,6 +267,7 @@ def main():
             displayImg(mainSurface, bkgImg, 0, 0)
 
             if coinRanInit:
+                checkP1 = time.time()
                 startTime = time.time()
 
                 while len(coinRanXList) < coinNum:
@@ -258,33 +287,12 @@ def main():
                     coinRanYList.append(newY)
 
                 coinRanInit = False
-            '''
-            # level up by time
-            time += 1
-            if time > 1000:
-                time = 0
-                coinSpeed += 2
-                keySpeed += 2
-            '''
 
-            '''
-            time = pygame.time.get_ticks()
-
-            if time >= 10000*level:
-                level += 1
-                print("workd")
-                coinSpeed += 2
-                keySpeed += 2
-                #characterSpeed[0] += 100
-            #'''
-            #print(startTime)
-            #print(checkP1)
-
-            checkP1 = time.time()
-            if (checkP1 - startTime) >= 10:
-                startTime = checkP1
-                coinSpeed += 2
-                keySpeed += 2
+            checkP2 = time.time()
+            if (checkP2 - checkP1) >= 5:
+                checkP1 = checkP2
+                coinSpeed += 1
+                keySpeed += 1
 
             for i in range(coinNum):
                 characterRect = characterImg.get_rect(topleft=(characterPos[0], characterPos[1]))
@@ -308,7 +316,7 @@ def main():
                         lifePlayer -= 1
 
                         if coinPlayer < 0:
-                            programState = "end"
+                            coinPlayer = 0
 
                 if coinRanYList[i] >= 610 or coinTouch:
 
@@ -363,26 +371,77 @@ def main():
 
             # Displays the number of coins with the coin image (top left corner)
             displayImg(mainSurface, coinImgS, 10, 10)
-            coinText = createText(f'x {coinPlayer}', s=25, c=(255, 255, 255), b=True)
+            coinText = createText(f'x {coinPlayer}', s=25, c=WHITE, b=True)
             mainSurface.blit(coinText, (15 + coinImgS.get_width(), 10))
 
+            # Exit button
+            createBttn(mainSurface, exitBttn, surfaceSize*0.9, surfaceSize*0.95, exitBttnC)
+            exitBttnHov = bttnDimension(mouse, exitBttn, surfaceSize*0.9, surfaceSize*0.95)
+
+            if exitBttnHov:
+                exitBttnC = (140, 116, 98)
+                if mouseUp:
+                    restart = True
+                    programState = 'main'
+            else:
+                exitBttnC = (112, 79, 55)
+
             if lifePlayer == 0:
+                endTime = time.time()
                 restart = True
                 programState = 'end'
 
         if programState == "end":
-            mainSurface.fill((118, 150, 194))
-            createBttn(mainSurface, homeBttn, horizontalC(homeBttn, mainSurface), surfaceSize - surfaceSize / 3,
-                       homeBttnC)
-            homeBttnHov = bttnDimension(mouse, homeBttn, horizontalC(homeBttn, mainSurface),
-                                         surfaceSize - surfaceSize / 3)
+            unit = ''
+            unit2 = ''
+            timeDiff = endTime - startTime
+
+            if coinPlayer < 10:
+                displayImg(mainSurface, noFriendsImg, 0, 0)
+            if coinPlayer >= 10:
+                displayImg(mainSurface, oneFriendImg, 0, 0)
+            if coinPlayer >= 25:
+                displayImg(mainSurface, twoFriendsImg, 0, 0)
+            if coinPlayer >= 40:
+                displayImg(mainSurface, tenFriendsImg, 0, 0)
+            if coinPlayer >= 60:
+                displayImg(mainSurface, twentyFriendsImg, 0, 0)
+
+            resultText = createText(f'{coinPlayer}', s=50, c=WHITE, b=True)
+            mainSurface.blit(resultText, (surfaceSize*0.57, surfaceSize*0.3))
+
+            if timeDiff < 60:
+                timeDiff = int(timeDiff)
+                unit = 'seconds'
+            elif timeDiff >= 60:
+                unit2 = f'{math.ceil(timeDiff % 60)} seconds'
+                timeDiff = int(timeDiff/60)
+                unit = 'minutes'
+
+                if timeDiff == 1:
+                    unit = 'minute'
+
+            resultText = createText(f'{timeDiff} {unit} {unit2}', s=35, c=WHITE, i=True)
+            mainSurface.blit(resultText, (horizontalC(resultText, mainSurface), surfaceSize*0.43))
+
+            createBttn(mainSurface, homeBttn, surfaceSize/2 - 130, surfaceSize*0.9, homeBttnC)
+            homeBttnHov = bttnDimension(mouse, homeBttn, surfaceSize/2 - 130, surfaceSize*0.9)
+            createBttn(mainSurface, replayBttn, surfaceSize/2 + 30, surfaceSize*0.9, replayBttnC)
+            replayBttnHov = bttnDimension(mouse, replayBttn, surfaceSize/2 + 30, surfaceSize*0.9)
+
             if homeBttnHov:
-                homeBttnC = (184, 199, 219)
+                homeBttnC = BUTTNBLUE
                 if mouseUp:
                     programState = "main"
                     mouseUp = False
+            elif replayBttnHov:
+                replayBttnC = BUTTNBLUE
+                if mouseUp:
+                    programState = "game"
+                    mouseUp = False
             else:
-                homeBttnC = (101, 128, 166)
+                homeBttnC = BUTTNHOVER
+                replayBttnC = BUTTNHOVER
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
