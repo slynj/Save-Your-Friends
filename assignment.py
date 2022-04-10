@@ -41,6 +41,7 @@ endTime = 0
 timeDiff = 0
 checkP1 = 0
 checkP2 = 0
+musicOn = True
 
 
 # Receives a string and other characters of a text and returns a rendered text
@@ -83,7 +84,7 @@ def horizontalC(item, mainSurface):
 
 def variableReset():
     global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
-        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2
+        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
 
     mouseUp = False
 
@@ -111,6 +112,8 @@ def variableReset():
     endTime = 0
     timeDiff = 0
 
+    musicOn = True
+
 
 def itemInit(file, division):
     itemInits = pygame.image.load(f'resources/{file}').convert_alpha()
@@ -121,7 +124,7 @@ def itemInit(file, division):
 def main():
     # -----------------------------Setup------------------------------------------------- #
     global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
-        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2
+        img, restart, level, keySpeed, time, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
 
     pygame.init()  # Prepare the pygame module for use
     pygame.font.init()
@@ -170,6 +173,10 @@ def main():
     exitBttn = createText("EXIT", s=25, c=WHITE, i=True)
     exitBttnC = (112, 79, 55)
 
+    # Muisc Button
+    musicBttn = createText("SOUND", s=25, c=WHITE, i=True)
+    musicBttnC = (112, 79, 55)
+
     # Character movement variables
     characterPos = [surfaceSize / 2, 600]  # X and Y Positions
 
@@ -197,6 +204,11 @@ def main():
     variableReset()
     for i in range(coinNum):
         img.append(coinImg)
+
+    #effect = pygame.mixer.Sound('resources/backgroundMuisc.mp3')
+    #effect.play()
+    pygame.mixer.music.load('resources/backgroundMuisc.mp3')
+    pygame.mixer.music.play(-1)
 
     # -----------------------------Main Game Loop---------------------------------------- #
     while True:
@@ -375,16 +387,30 @@ def main():
             mainSurface.blit(coinText, (15 + coinImgS.get_width(), 10))
 
             # Exit button
-            createBttn(mainSurface, exitBttn, surfaceSize*0.9, surfaceSize*0.95, exitBttnC)
-            exitBttnHov = bttnDimension(mouse, exitBttn, surfaceSize*0.9, surfaceSize*0.95)
+            createBttn(mainSurface, exitBttn, surfaceSize*0.9, surfaceSize*0.9, exitBttnC)
+            exitBttnHov = bttnDimension(mouse, exitBttn, surfaceSize*0.9, surfaceSize*0.9)
+
+            # Music button
+            createBttn(mainSurface, musicBttn, surfaceSize * 0.857, surfaceSize * 0.95, musicBttnC)
+            musicBttnHov = bttnDimension(mouse, musicBttn, surfaceSize * 0.857, surfaceSize * 0.95)
 
             if exitBttnHov:
                 exitBttnC = (140, 116, 98)
                 if mouseUp:
                     restart = True
                     programState = 'main'
+            elif musicBttnHov:
+                musicBttnC = (140, 116, 98)
+                if mouseUp:
+                    if musicOn:
+                        musicOn = False
+                        pygame.mixer.music.stop()
+                    else:
+                        musicOn = True
+                        pygame.mixer.music.play(-1)
             else:
                 exitBttnC = (112, 79, 55)
+                musicBttnC = (112, 79, 55)
 
             if lifePlayer == 0:
                 endTime = time.time()
