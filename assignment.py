@@ -18,6 +18,24 @@
 import pygame
 import random
 
+mouseUp = False
+characterSpeed = [0, 0]
+# Variables for random XY coordinates of the coin
+coinRanInit = True
+coinRanXList = []
+coinRanYList = []
+coinNum = 10
+coinSpeed = 5
+coinTouch = False
+coinPlayer = 0
+# Variables for life
+lifePlayer = 5
+img = []
+restart = False
+level = 1
+keySpeed = 5
+time = 0
+
 
 # Receives a string and other characters of a text and returns a rendered text
 def createText(t, f="Arial", s=200, c=(255, 255, 0), b=False, i=False):
@@ -58,23 +76,30 @@ def horizontalC(item, mainSurface):
 
 
 def variableReset():
-    # Mouse click detection
+    global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, img, restart, level, keySpeed, time, characterSpeed
+
     mouseUp = False
+
+    # Character movement variables
+    characterSpeed = [0, 0]  # X and Y Speeds
 
     # Variables for random XY coordinates of the coin
     coinRanInit = True
     coinRanXList = []
     coinRanYList = []
-    coinNum = 6
+    coinNum = 10
     coinSpeed = 5
     coinTouch = False
     coinPlayer = 0
 
     # Variables for life
     lifePlayer = 5
-    img = []
 
+    img = []
     restart = False
+    level = 1
+    keySpeed = 5
+    time = 0
 
 
 def itemInit(file, division):
@@ -85,7 +110,7 @@ def itemInit(file, division):
 
 def main():
     # -----------------------------Setup------------------------------------------------- #
-    global mouseUp # MouseUp boolean to use in and out of the while loop
+    global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, img, restart, level, keySpeed, time, characterSpeed
 
     pygame.init()  # Prepare the pygame module for use
     pygame.font.init()
@@ -114,9 +139,12 @@ def main():
     bkgImg = pygame.image.load('resources/background.png').convert_alpha()
     bkgImg = pygame.transform.smoothscale(bkgImg, (surfaceSize, surfaceSize))
 
+    # Home Button
+    homeBttn = createText("HOME", s=30, c=(255, 255, 255))
+    homeBttnC = (65, 104, 158)
+
     # Character movement variables
     characterPos = [surfaceSize / 2, 600]  # X and Y Positions
-    characterSpeed = [0, 0]  # X and Y Speeds
 
     # Item Graphics
     coinImg = itemInit("coin.png", 3.85)
@@ -132,27 +160,9 @@ def main():
 
     coinImgS = pygame.transform.smoothscale(coinImg, (coinImg.get_width() / 1.3, coinImg.get_height() / 1.3))
 
-    #'''
-    # Mouse click detection
-    mouseUp = False
-
-    # Variables for random XY coordinates of the coin
-    coinRanInit = True
-    coinRanXList = []
-    coinRanYList = []
-    coinNum = 6
-    coinSpeed = 5
-    coinTouch = False
-    coinPlayer = 0
-
-    # Variables for life
-    lifePlayer = 5
-    img = []
+    variableReset()
     for i in range(coinNum):
         img.append(coinImg)
-
-    restart = False
-    #'''
 
     # -----------------------------Main Game Loop----------------------------------------#
     while True:
@@ -167,9 +177,9 @@ def main():
         elif ev.type == pygame.KEYDOWN:
             if programState == "game":
                 if ev.key == pygame.K_LEFT:
-                    characterSpeed[0] -= 5
+                    characterSpeed[0] -= keySpeed
                 elif ev.key == pygame.K_RIGHT:
-                    characterSpeed[0] += 5
+                    characterSpeed[0] += keySpeed
 
         elif ev.type == pygame.KEYUP:
             if programState == "game":
@@ -202,14 +212,14 @@ def main():
                 startBttnC = (101, 128, 166)
 
         elif programState == "game":
-            '''
+
             if restart:
-                print("test")
-                lifePlayer = 5
                 variableReset()
+
                 for i in range(coinNum):
                     img.append(coinImg)
-            '''
+
+                characterPos = [surfaceSize / 2, 600]  # X and Y Positions
 
             displayImg(mainSurface, bkgImg, 0, 0)
 
@@ -220,7 +230,7 @@ def main():
                     closeX = False
                     for i in range(len(coinRanXList)):
 
-                        if coinRanXList[i] - 60 < newX < coinRanXList[i] + 60:
+                        if coinRanXList[i] - 50 < newX < coinRanXList[i] + 50:
                             closeX = True
 
                     if not closeX:
@@ -231,6 +241,27 @@ def main():
                     coinRanYList.append(newY)
 
                 coinRanInit = False
+
+            # level up by time
+            time += 1
+            if time > 1000:
+                time = 0
+                coinSpeed += 2
+                keySpeed += 2
+
+            '''
+            time += pygame.time.get_ticks()
+            print(time)
+
+            if time > 10000:
+                time = 0
+                print("workd")
+                coinSpeed += 30
+                keySpeed += 2
+                #characterSpeed[0] += 100
+            else:
+                time = 0
+            '''
 
             for i in range(coinNum):
                 characterRect = characterImg.get_rect(topleft=(characterPos[0], characterPos[1]))
@@ -251,8 +282,10 @@ def main():
                     elif img[i] == taxImg:
                         displayImg(mainSurface, exclaImg, coinRanXList[i], coinRanYList[i])
                         coinPlayer = int(coinPlayer*0.9)
+                        lifePlayer -= 1
+
                         if coinPlayer < 0:
-                            coinPlayer = 0
+                            programState = "end"
 
                 if coinRanYList[i] >= 610 or coinTouch:
 
@@ -263,7 +296,7 @@ def main():
 
                     item = random.randint(0, 100)
 
-                    if item % 10 == 0:
+                    if item % 5 == 0:
                         img[i] = bombImg
                     elif item % 13 == 0:
                         img[i] = cashImg
@@ -313,7 +346,21 @@ def main():
 
             if lifePlayer == 0:
                 restart = True
-                programState = 'main'
+                programState = 'end'
+
+        if programState == "end":
+            createBttn(mainSurface, homeBttn, horizontalC(homeBttn, mainSurface), surfaceSize - surfaceSize / 3,
+                       homeBttnC)
+            homeBttnHov = bttnDimension(mouse, homeBttn, horizontalC(homeBttn, mainSurface),
+                                         surfaceSize - surfaceSize / 3)
+            if homeBttnHov:
+                homeBttnC = (184, 199, 219)
+                if mouseUp:
+                    programState = "main"
+                    mouseUp = False
+            else:
+                homeBttnC = (101, 128, 166)
+
 
         # Now the surface is ready, tell pygame to display it!
         pygame.display.flip()
