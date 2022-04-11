@@ -322,7 +322,7 @@ def main():
     exitBttn = createText("EXIT", s=25, c=WHITE, i=True)
     exitBttnC = (112, 79, 55)
 
-    # Muisc Button
+    # Music Button
     musicBttn = createText("SOUND", s=25, c=WHITE, i=True)
     musicBttnC = (112, 79, 55)
 
