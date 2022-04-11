@@ -51,42 +51,83 @@ import time
 import math
 
 # Variables initial setup (written outside of function to use it as a global variable)
-mouseUp = False
-characterSpeed = [0, 0]
-keySpeed = 5
+mouseUp = False         # indicates if the mouse is clicked
+characterSpeed = [0, 0] # speed of the character
+keySpeed = 5            # the amount of speed increased by when arrow keys pressed
 
-musicOn = True
-restart = False
-level = 1
-lifePlayer = 5
-img = []
+musicOn = True          # indicates if the music should be on or off
+restart = False         # indicates if the variables should be resetted or not
+lifePlayer = 5          # the number of player's life left
+img = []                # stores the types of item (coin, cash, bomb, tax)
 
 # Variables coins (items)
-coinRanInit = True
-coinRanXList = []
-coinRanYList = []
-coinNum = 10
-coinSpeed = 5
-coinTouch = False
-coinPlayer = 0
+coinRanInit = True      # indicates if the coin's random XY should be initialized or not
+coinRanXList = []       # stores the X coordinate of the coin
+coinRanYList = []       # stores the Y coordinate of the coin
+coinNum = 10            # number of coins presented on the screen
+coinSpeed = 5           # speed of the coin that should be falling at
+coinTouch = False       # indicates if the coin touched the character
+coinPlayer = 0          # the number of coins earned by the character
 
 # Variables for time
-startTime = 0
-endTime = 0
-timeDiff = 0
-checkP1 = 0
-checkP2 = 0
+startTime = 0           # the time when the player starts playing
+endTime = 0             # the time when the player dies
+timeDiff = 0            # the differences of the two time check points
+checkP1 = 0             # first time check point
+checkP2 = 0             # second time check point
 
 
-# Receives a string and other characters of a text and returns a rendered text
 def createText(t, f="Arial", s=200, c=(255, 255, 0), b=False, i=False):
+    '''
+    Receives a string and other characters of a text and returns a rendered text
+
+    Parameters
+    ----------
+    t: str
+        the string of the text to be rendered
+    f: str = "Arial"
+        the string indicating the font style of the text
+    s: int = 200,
+        size of the text
+    c: tuple[int, int, int] = (255, 255, 0)
+        colour of the text
+    b: bool = False
+        indication if the text would be bold
+    i: bool = False
+        indication if the text would be italicized
+
+    Returns
+    -------
+    pygame.Surface
+        rendered text
+    '''
+
     font = pygame.font.SysFont(f, s, bold=b, italic=i)
     text = font.render(t, True, c)
     return text
 
 
-# Receives a text of the button with XY coordinates and draws a rectangle button with that text
 def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
+    '''
+    Receives a text of the button with XY coordinates and draws a rectangle button with that text
+
+    Parameters
+    ----------
+    mainSurface: pygame.Surface
+        the surface to draw the elements
+    text: pygame.Surface
+        the rendered text of the button
+    textX: float
+        the X coordinate of the button
+    textY: float
+        the Y coordinate of the button
+    c: tuple[int, int, int] = (0, 0, 0)
+        colour of the button
+
+    Returns
+    -------
+    None
+    '''
     paddingW = text.get_width() * 0.3
     paddingH = text.get_height() * 0.1
     dimension = [textX - paddingW / 2, textY - paddingH / 2, text.get_width() + paddingW, text.get_height() + paddingH]
@@ -94,8 +135,26 @@ def createBttn(mainSurface, text, textX, textY, c=(0, 0, 0)):
     mainSurface.blit(text, (textX, textY))
 
 
-# Collision detection for the button, returns TRUE or FALSE
 def bttnDimension(mouse, text, textX, textY):
+    '''
+    Collision detection for the button, returns TRUE or FALSE
+
+    Parameters
+    ----------
+    mouse: tuple
+        XY coordinates of the mouse pointer
+    text: pygame.Surface
+        the rendered text of the button
+    textX: float
+        the X coordinate of the button
+    textY: float
+        the Y coordinate of the button
+
+    Returns
+    -------
+    bool
+        if the mouse is touching the button or not
+    '''
     paddingW = text.get_width() * 0.3
     paddingH = text.get_height() * 0.1
     dimension = [textX - paddingW / 2, textY - paddingH / 2, text.get_width() + paddingW, text.get_height() + paddingH]
@@ -106,20 +165,61 @@ def bttnDimension(mouse, text, textX, textY):
         return False
 
 
-# Draws the image on the given coordinates
-def displayImg(mainSurface, img, x, y):
-    mainSurface.blit(img, (x, y))
+def displayImg(mainSurface, imgFile, x, y):
+    '''
+    Draws the image on the given coordinates
+
+    Parameters
+    ----------
+    mainSurface: pygame.Surface
+        the surface to draw the elements
+    imgFile: pygame.Surface
+        the loaded image to be drawn
+    x: float
+        x coordinate of the image to be drawn
+    y: float
+        y coordinate of the image to be drawn
+
+    Returns
+    -------
+    None
+    '''
+    mainSurface.blit(imgFile, (x, y))
 
 
-# Calculates what coordinate of the item's horizontal centre is
 def horizontalC(item, mainSurface):
+    '''
+    Calculates what coordinate of the item's horizontal centre is
+
+    Parameters
+    ----------
+    mainSurface: pygame.Surface
+        the surface to draw the elements
+    item: pygame.Surface
+        element to be horizontally centered
+
+    Returns
+    -------
+    int
+        the x coordinate where the element would be centered
+    '''
     return int((mainSurface.get_width() - item.get_width()) // 2)
 
 
-# Resets all the global variables before restarting the game
 def variableReset():
+    '''
+    Resets all the global variables before restarting the game
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    '''
     global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
-        img, restart, level, keySpeed, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
+        img, restart, keySpeed, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
 
     mouseUp = False
     characterSpeed = [0, 0]
@@ -127,7 +227,6 @@ def variableReset():
 
     musicOn = True
     restart = False
-    level = 1
     lifePlayer = 5
     img = []
 
@@ -150,6 +249,21 @@ def variableReset():
 
 # Image files size initialization
 def itemInit(file, division):
+    '''
+    Resets all the global variables before restarting the game
+
+    Parameters
+    ----------
+    file: str
+        the name of the file to load
+    division: float
+        the multiplier to reduce the image size by
+
+    Returns
+    -------
+    pygame.Surface
+        the resized version of the image
+    '''
     itemInits = pygame.image.load(f'resources/{file}').convert_alpha()
     itemInits = pygame.transform.smoothscale(itemInits, (itemInits.get_width() / division, itemInits.get_height() / division))
     return itemInits
@@ -159,7 +273,7 @@ def itemInit(file, division):
 def main():
     # -----------------------------Setup------------------------------------------------- #
     global mouseUp, coinRanInit, coinRanXList, coinRanYList, coinNum, coinSpeed, coinTouch, coinPlayer, lifePlayer, \
-        img, restart, level, keySpeed, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
+        img, restart, keySpeed, characterSpeed, startTime, endTime, timeDiff, checkP1, checkP2, musicOn
 
     pygame.init()  # Prepare the pygame module for use
     pygame.font.init()
