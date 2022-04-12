@@ -17,6 +17,9 @@
 #       -> image used for items/characters
 #   - background music
 #       -> toggle button to turn on/off
+#       -> different music on for each screen (main/game/end)
+#   - sound effect
+#       -> different sound effects for each items
 #   - time module used
 #       -> calculates how long user played the game (minutes/seconds)
 #       -> increases the items' falling speed every 5 second
@@ -355,9 +358,17 @@ def main():
     for i in range(coinNum):
         img.append(coinImg)
 
-    # Start background music (infinitely play it)
-    pygame.mixer.music.load('resources/backgroundMuisc.mp3')
-    pygame.mixer.music.play(-1)
+    # Creates a user even that indicates if the song is ended or not
+    SONG_END = pygame.USEREVENT
+    pygame.mixer.music.set_endevent(SONG_END)
+
+    # Different Sound Effects
+    coinSoundEffect = pygame.mixer.Sound('resources/coinSoundEffect.mp3')
+    cashSoundEffect = pygame.mixer.Sound('resources/cashSoundEffect.mp3')
+    bombSoundEffect = pygame.mixer.Sound('resources/bombSoundEffect.mp3')
+    taxSoundEffect = pygame.mixer.Sound('resources/taxSoundEffect.mp3')
+
+    stateChange = True
 
     # -----------------------------Main Game Loop---------------------------------------- #
     while True:
@@ -387,6 +398,22 @@ def main():
             if programState == "game":
                 characterSpeed[0] = 0
 
+        # Song is ended
+        if (ev.type == SONG_END or stateChange) and musicOn:
+            if stateChange:
+                stateChange = False
+                pygame.mixer.music.stop()
+            # Different kind of music depending on the state
+            if programState == "main":
+                pygame.mixer.music.load('resources/mainMusic.mp3')
+                pygame.mixer.music.play()
+            elif programState == "game":
+                pygame.mixer.music.load('resources/gameMusic.mp3')
+                pygame.mixer.music.play()
+            elif programState == "end":
+                pygame.mixer.music.load('resources/endMusic.mp3')
+                pygame.mixer.music.play()
+
         mouse = pygame.mouse.get_pos()
 
         # Constant colours for buttons
@@ -413,6 +440,7 @@ def main():
                 startBttnC = BUTTNBLUE
                 if mouseUp:
                     programState = "game"
+                    stateChange = True
             elif helpBttnHov:
                 displayImg(mainSurface, rulesImg, 0,0)
                 helpBttnC = BUTTNBLUE
@@ -431,10 +459,10 @@ def main():
                 if mouseUp:
                     if musicOn:
                         musicOn = False
-                        pygame.mixer.music.stop()
+                        pygame.mixer.music.pause()
                     else:
                         musicOn = True
-                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.unpause()
             else:
                 musicBttnC = BUTTNHOVER
 
@@ -494,16 +522,24 @@ def main():
                 if characterRect.colliderect(coinRect):
                     coinTouch = True
                     if img[i] == coinImg:
+                        if musicOn:
+                            coinSoundEffect.play()
                         coinPlayer += 1
 
                     elif img[i] == cashImg:
+                        if musicOn:
+                            cashSoundEffect.play()
                         coinPlayer += 5
 
                     elif img[i] == bombImg:
+                        if musicOn:
+                            bombSoundEffect.play()
                         displayImg(mainSurface, bombEImg, coinRanXList[i], coinRanYList[i])
                         lifePlayer -= 1
 
                     elif img[i] == taxImg:
+                        if musicOn:
+                            taxSoundEffect.play()
                         displayImg(mainSurface, exclaImg, coinRanXList[i], coinRanYList[i])
                         coinPlayer = int(coinPlayer*0.9)
                         lifePlayer -= 1
@@ -585,16 +621,17 @@ def main():
                 if mouseUp:
                     restart = True
                     programState = 'main'
+                    stateChange = True
             # If music button is clicked, toggle the music (ON/OFF)
             elif musicBttnHov:
                 musicBttnC = (140, 116, 98)
                 if mouseUp:
                     if musicOn:
                         musicOn = False
-                        pygame.mixer.music.stop()
+                        pygame.mixer.music.pause()
                     else:
                         musicOn = True
-                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.unpause()
             else:
                 exitBttnC = (112, 79, 55)
                 musicBttnC = (112, 79, 55)
@@ -604,6 +641,7 @@ def main():
                 endTime = time.time()
                 restart = True
                 programState = 'end'
+                stateChange = True
 
         # END SCREEN
         if programState == "end":
@@ -650,10 +688,10 @@ def main():
                 if mouseUp:
                     if musicOn:
                         musicOn = False
-                        pygame.mixer.music.stop()
+                        pygame.mixer.music.pause()
                     else:
                         musicOn = True
-                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.unpause()
             else:
                 musicBttnC = BUTTNHOVER
 
@@ -672,12 +710,14 @@ def main():
                 homeBttnC = BUTTNBLUE
                 if mouseUp:
                     programState = "main"
+                    stateChange = True
                     mouseUp = False
             # If replay button is clicked, go back to the game screen
             elif replayBttnHov:
                 replayBttnC = BUTTNBLUE
                 if mouseUp:
                     programState = "game"
+                    stateChange = True
                     mouseUp = False
             else:
                 homeBttnC = BUTTNHOVER
