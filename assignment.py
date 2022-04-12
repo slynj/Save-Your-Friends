@@ -228,7 +228,6 @@ def variableReset():
     characterSpeed = [0, 0]
     keySpeed = 5
 
-    musicOn = True
     restart = False
     lifePlayer = 5
     img = []
